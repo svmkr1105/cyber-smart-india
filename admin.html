@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Cyber Smart India</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .admin-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .announcement-list-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .announcement-list-item.active {
+            background: rgba(6, 182, 212, 0.3);
+            border-left: 4px solid #06b6d4;
+        }
+        
+        .active-badge {
+            background: #10b981;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body class="text-white">
+    <div class="container mx-auto px-4 py-8">
+
+        <!-- Admin Login Section -->
+        <div id="loginSection" class="max-w-md mx-auto admin-card">
+            <div class="text-center mb-6">
+                <i class="fas fa-user-shield text-5xl text-cyan-400 mb-3"></i>
+                <h1 class="text-3xl font-bold">Admin Login</h1>
+                <p class="text-gray-300 text-sm mt-2">Secure access to dashboard</p>
+            </div>
+            <input type="password" id="adminPassword" placeholder="Enter Admin Password" class="w-full p-3 rounded-lg text-black mb-4">
+            <button onclick="checkLogin()" class="w-full bg-cyan-500 hover:bg-cyan-600 p-3 rounded-lg font-bold transition">Login</button>
+            <p id="loginError" class="text-red-400 text-center mt-3 hidden">Wrong password!</p>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="dashboardSection" class="hidden">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-3xl font-bold">🛡️ Admin Dashboard</h1>
+                    <p class="text-gray-300 text-sm">Manage announcements, feedbacks, and user interactions</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="openMainPage()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-external-link-alt mr-2"></i>View Website
+                    </button>
+                    <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid md:grid-cols-4 gap-4 mb-8">
+                <div class="admin-card text-center">
+                    <i class="fas fa-comments text-3xl text-cyan-400 mb-2"></i>
+                    <div class="text-3xl font-bold" id="totalFeedbacks">0</div>
+                    <div>Total Feedbacks</div>
+                </div>
+                <div class="admin-card text-center">
+                    <i class="fas fa-star text-3xl text-yellow-400 mb-2"></i>
+                    <div class="text-3xl font-bold" id="avgRating">0</div>
+                    <div>Average Rating</div>
+                </div>
+                <div class="admin-card text-center">
+                    <i class="fas fa-bullhorn text-3xl text-cyan-400 mb-2"></i>
+                    <div class="text-3xl font-bold" id="totalAnnouncements">0</div>
+                    <div>Total Announcements</div>
+                </div>
+                <div class="admin-card text-center">
+                    <i class="fas fa-check-circle text-3xl text-green-400 mb-2"></i>
+                    <div class="text-3xl font-bold" id="activeAnnouncement">0</div>
+                    <div>Active</div>
+                </div>
+            </div>
+
+            <!-- ==================== MULTIPLE ANNOUNCEMENTS MANAGEMENT ==================== -->
+            <div class="admin-card mb-8">
+                <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+                    <i class="fas fa-bullhorn text-cyan-400"></i> 📢 Announcements Manager
+                </h2>
+                <p class="text-gray-300 text-sm mb-4">Multiple announcements save kar sakte ho. Jo "Active" hoga wahi public page par dikhega.</p>
+
+                <!-- Add New Announcement -->
+                <div class="flex flex-col md:flex-row gap-3 mb-6">
+                    <input type="text" id="newAnnouncement" class="flex-1 p-3 rounded-lg text-black" placeholder="Type new announcement here...">
+                    <button onclick="addAnnouncement()" class="bg-cyan-500 hover:bg-cyan-600 px-6 py-3 rounded-lg transition">
+                        <i class="fas fa-plus mr-2"></i>Add Announcement
+                    </button>
+                </div>
+
+                <!-- Announcements List -->
+                <h3 class="font-semibold mb-3">📋 All Announcements</h3>
+                <div id="announcementsList" class="max-h-80 overflow-y-auto space-y-2">
+                    <!-- Announcements will appear here -->
+                </div>
+            </div>
+
+            <!-- All Feedbacks Table -->
+            <div class="admin-card">
+                <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+                    <i class="fas fa-list-alt text-cyan-400"></i> All User Feedbacks
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-gray-600">
+                            <tr>
+                                <th class="text-left p-2">User</th>
+                                <th class="text-left p-2">Rating</th>
+                                <th class="text-left p-2">Message</th>
+                                <th class="text-left p-2">Admin Reply</th>
+                                <th class="text-left p-2">Date</th>
+                                <th class="text-left p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminFeedbackList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "Kartik@1234";
+
+        // ==================== ANNOUNCEMENTS STORAGE ====================
+        let announcements = [];
+
+        function loadAnnouncementsFromStorage() {
+            const stored = localStorage.getItem('allAnnouncements');
+            if (stored) {
+                announcements = JSON.parse(stored);
+            } else {
+                // Default announcements
+                announcements = [{
+                    id: Date.now(),
+                    text: "🎉 Welcome to Cyber Smart India! Stay safe online.",
+                    isActive: true,
+                    date: new Date().toLocaleString()
+                }, {
+                    id: Date.now() + 1,
+                    text: "📞 Report cyber fraud: Dial 1930",
+                    isActive: false,
+                    date: new Date().toLocaleString()
+                }];
+                saveAnnouncements();
+            }
+            displayAnnouncementsList();
+            updateActiveAnnouncement();
+            updateStats();
+        }
+
+        function saveAnnouncements() {
+            localStorage.setItem('allAnnouncements', JSON.stringify(announcements));
+            // Update the active announcement in localStorage for public page
+            const active = announcements.find(a => a.isActive === true);
+            localStorage.setItem('globalAnnouncement', active ? active.text : '');
+        }
+
+        function addAnnouncement() {
+            const input = document.getElementById('newAnnouncement');
+            const text = input.value.trim();
+            if (!text) {
+                showToast('Please enter announcement text', 'error');
+                return;
+            }
+
+            const newAnnouncement = {
+                id: Date.now(),
+                text: text,
+                isActive: false,
+                date: new Date().toLocaleString()
+            };
+
+            announcements.push(newAnnouncement);
+            saveAnnouncements();
+            displayAnnouncementsList();
+            input.value = '';
+            showToast('✅ Announcement added!', 'success');
+            updateStats();
+        }
+
+        function setActiveAnnouncement(id) {
+            announcements.forEach(a => {
+                a.isActive = (a.id === id);
+            });
+            saveAnnouncements();
+            displayAnnouncementsList();
+            updateActiveAnnouncement();
+            showToast('Active announcement updated!', 'success');
+        }
+
+        function deleteAnnouncement(id) {
+            if (confirm('Are you sure you want to delete this announcement?')) {
+                announcements = announcements.filter(a => a.id !== id);
+                saveAnnouncements();
+                displayAnnouncementsList();
+                updateActiveAnnouncement();
+                updateStats();
+                showToast('Announcement deleted', 'success');
+            }
+        }
+
+        function editAnnouncement(id) {
+            const announcement = announcements.find(a => a.id === id);
+            if (!announcement) return;
+
+            const newText = prompt('Edit announcement:', announcement.text);
+            if (newText && newText.trim()) {
+                announcement.text = newText.trim();
+                saveAnnouncements();
+                displayAnnouncementsList();
+                showToast('Announcement updated!', 'success');
+            }
+        }
+
+        function displayAnnouncementsList() {
+            const container = document.getElementById('announcementsList');
+            if (!container) return;
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-4">No announcements yet. Add one above!</div>';
+                return;
+            }
+
+            container.innerHTML = announcements.map(a => `
+                <div class="announcement-list-item ${a.isActive ? 'active' : ''}">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="${a.isActive ? 'active-badge' : 'text-gray-400 text-xs'}">
+                                ${a.isActive ? '✅ ACTIVE' : '⭕ Inactive'}
+                            </span>
+                            <span class="text-sm">${escapeHtml(a.text)}</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">📅 ${a.date}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        ${!a.isActive ? `<button onclick="setActiveAnnouncement(${a.id})" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs transition">
+                            <i class="fas fa-check"></i> Set Active
+                        </button>` : ''}
+                        <button onclick="editAnnouncement(${a.id})" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-xs transition">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteAnnouncement(${a.id})" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs transition">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateActiveAnnouncement() {
+            const active = announcements.find(a => a.isActive === true);
+            const activeCount = document.getElementById('activeAnnouncement');
+            if (activeCount) activeCount.innerText = active ? '1' : '0';
+        }
+        
+        function updateStats() {
+            const totalAnn = document.getElementById('totalAnnouncements');
+            if (totalAnn) totalAnn.innerText = announcements.length;
+        }
+        
+        // ==================== FEEDBACK FUNCTIONS ====================
+        function loadFeedbacks() {
+            const feedbacks = JSON.parse(localStorage.getItem('cyberSmartFeedbacks') || '[]');
+            
+            document.getElementById('totalFeedbacks').innerText = feedbacks.length;
+            
+            let totalRating = 0;
+            feedbacks.forEach(f => totalRating += f.rating);
+            document.getElementById('avgRating').innerText = (totalRating / feedbacks.length || 0).toFixed(1);
+            
+            const tbody = document.getElementById('adminFeedbackList');
+            if (feedbacks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-400">No feedbacks yet</td></tr>';
+            } else {
+                tbody.innerHTML = feedbacks.map(f => `
+                    <tr class="border-b border-gray-700 hover:bg-white/5">
+                        <td class="p-2">
+                            <div class="font-semibold">${escapeHtml(f.name)}</div>
+                            <div class="text-xs text-gray-400">${f.email || 'No email'}</div>
+                        </td>
+                        <td class="p-2">${'⭐'.repeat(f.rating)}</td>
+                        <td class="p-2 max-w-xs">
+                            <div class="text-sm">${escapeHtml(f.message)}</div>
+                            <div class="text-xs text-gray-400 mt-1">${f.date || 'Unknown date'}</div>
+                        </td>
+                        <td class="p-2">
+                            ${f.adminReply ? 
+                                `<div class="bg-green-900/30 p-2 rounded text-xs">
+                                    <i class="fas fa-reply text-green-400 mr-1"></i>
+                                    ${escapeHtml(f.adminReply)}
+                                    <div class="text-gray-400 text-xs mt-1">${f.replyDate || ''}</div>
+                                </div>` : 
+                                `<span class="text-gray-500 text-sm">No reply yet</span>`
+                            }
+                        </td>
+                        <td class="p-2 text-xs">${f.date || 'N/A'}</td>
+                        <td class="p-2">
+                            <button onclick="deleteFeedback(${f.id})" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs transition mb-1 block w-full">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                            <button onclick="replyToFeedback(${f.id})" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs transition block w-full">
+                                <i class="fas fa-reply mr-1"></i>${f.adminReply ? 'Edit Reply' : 'Reply'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        function deleteFeedback(id) {
+            if (confirm('Delete this feedback?')) {
+                let feedbacks = JSON.parse(localStorage.getItem('cyberSmartFeedbacks') || '[]');
+                feedbacks = feedbacks.filter(f => f.id !== id);
+                localStorage.setItem('cyberSmartFeedbacks', JSON.stringify(feedbacks));
+                loadFeedbacks();
+                showToast('Feedback deleted', 'success');
+            }
+        }
+        
+        function replyToFeedback(id) {
+            let feedbacks = JSON.parse(localStorage.getItem('cyberSmartFeedbacks') || '[]');
+            const feedback = feedbacks.find(f => f.id === id);
+            const reply = prompt('Enter your reply:', feedback?.adminReply || '');
+            if (reply !== null) {
+                const index = feedbacks.findIndex(f => f.id === id);
+                if (index !== -1) {
+                    feedbacks[index].adminReply = reply;
+                    feedbacks[index].replyDate = new Date().toLocaleString();
+                    localStorage.setItem('cyberSmartFeedbacks', JSON.stringify(feedbacks));
+                    loadFeedbacks();
+                    showToast(reply ? 'Reply added' : 'Reply removed', 'success');
+                }
+            }
+        }
+        
+        // ==================== LOGIN FUNCTIONS ====================
+        function checkLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                loadAnnouncementsFromStorage();
+                loadFeedbacks();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('loginError').classList.add('hidden');
+                }, 2000);
+            }
+        }
+        
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        }
+        
+        function openMainPage() {
+            window.open('index.html', '_blank');
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-5 right-5 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white px-4 py-2 rounded-lg shadow-lg z-50`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Auto refresh every 5 seconds
+        setInterval(() => {
+            if (document.getElementById('dashboardSection') && !document.getElementById('dashboardSection').classList.contains('hidden')) {
+                loadFeedbacks();
+            }
+        }, 5000);
+    </script>
+</body>
+
+</html>
